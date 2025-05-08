@@ -277,6 +277,11 @@ export const elxContractABI = [
         "internalType": "string",
         "name": "_image",
         "type": "string"
+      },
+      {
+        "internalType": "string",
+        "name": "_tokenCid",
+        "type": "string"
       }
     ],
     "name": "createListing",
@@ -453,6 +458,44 @@ export const elxContractABI = [
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "_tokenId",
+        "type": "uint256"
+      },
+      {
+        "internalType": "string",
+        "name": "_tokenCid",
+        "type": "string"
+      }
+    ],
+    "name": "setTokenUri",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "_tokenId",
+        "type": "uint256"
+      }
+    ],
+    "name": "getTokenUri",
+    "outputs": [
+      {
+        "internalType": "string",
+        "name": "",
+        "type": "string"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function",
+    "constant": true
   },
   {
     "inputs": [

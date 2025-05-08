@@ -74,6 +74,7 @@ contract EstateLuxe is ERC721{
   // returns a list of realty transactions that has occurred, by its token id 
   mapping(uint256 => RealtyTxn[]) realtyTxns;
 
+  mapping(uint256 => string) _tokenUri;
 
   constructor(string memory name_, string memory symbol_){
     _name = name_;
@@ -88,7 +89,8 @@ contract EstateLuxe is ERC721{
     string memory _location, 
     string memory _description, 
     uint256 _price,
-    string memory _image
+    string memory _image,
+    string memory _tokenCid
     ) public {
 
       require(bytes(_location).length > 0, "Location must not be empty");
@@ -108,7 +110,7 @@ contract EstateLuxe is ERC721{
       realtyProperty[tokenIndex]=realty;
       realties.push(realty);
       mint(msg.sender, realty.tokenId);
-
+      setTokenUri(realty.tokenId, _tokenCid);
       tokenIndex ++;
       
       emit RealtyListed(realty.tokenId, realty.location, realty.description, realty.price, realty.owner, realty.isForSale, realty.image);
@@ -225,6 +227,21 @@ contract EstateLuxe is ERC721{
     _tokenOwner[_tokenId] = _owner;
     _ownedTokensCount[_owner] += 1;
     emit Transfer(address(0), _owner, _tokenId);
+  }
+
+
+  // setting token metadata uri with its content identifier (CID)
+  function setTokenUri(uint256 _tokenId, string memory _tokenCid)public  {
+    require(_tokenOwner[_tokenId] != address(0), "NFT does not exist");
+    string memory baseUri = "ipfs://";
+    string memory tokenUri = string(abi.encodePacked(baseUri, _tokenCid)); // string concatenation of baseURI with token CID
+    _tokenUri[_tokenId] = tokenUri;
+  }
+
+
+  function getTokenUri(uint256 _tokenId) public view returns(string memory) {
+    require(_tokenOwner[_tokenId] != address(0), "NFT does not exist");
+    return _tokenUri[_tokenId];
   }
   
 
