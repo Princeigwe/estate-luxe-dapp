@@ -89,6 +89,6 @@ const ethPrice = 3
 
 // elxInteractions.createListing(location, description, ethPrice, nftImage, tokenCid)
 
-// elxInteractions.getMyRealties()
+elxInteractions.getMyRealties()
 
-elxInteractions.getTokenUri(1)
+// elxInteractions.getTokenUri(1)
