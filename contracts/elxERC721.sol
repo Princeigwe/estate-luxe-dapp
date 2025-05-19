@@ -133,6 +133,8 @@ contract EstateLuxe is ERC721{
     }
     payable(_tokenOwner[tokenId]).transfer(money);
 
+    address previousOwner = _tokenOwner[tokenId];
+
     transferFrom(_tokenOwner[tokenId], msg.sender, tokenId);
     realtyProperty[tokenId].owner = payable(msg.sender);
     realtyProperty[tokenId].isForSale = false;
@@ -140,7 +142,7 @@ contract EstateLuxe is ERC721{
     RealtyTxn memory realtyTxn = RealtyTxn({
       tokenId: tokenId,
       price: _price,
-      seller:payable( _tokenOwner[tokenId]),
+      seller:payable(previousOwner),
       buyer: payable(msg.sender),
       date: block.timestamp
     });

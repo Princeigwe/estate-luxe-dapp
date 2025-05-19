@@ -181,10 +181,10 @@ const ethPrice = 3
 // elxInteractions.walletAGetMyRealties()
 // elxInteractions.walletBGetMyRealties()
 
-// elxInteractions.walletBBuyListing(0, 5)
+elxInteractions.walletBBuyListing(0, 5)
 
 // elxInteractions.walletBGetTokenUri(0)
 
 // elxInteractions.walletAGetRealtyTxns(0)
 
-elxInteractions.walletBGetTokenOwner(0)
+// elxInteractions.walletBGetTokenOwner(0)
