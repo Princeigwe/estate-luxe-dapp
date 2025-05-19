@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.13;
+pragma solidity ^0.8.14;
 
 import './ERC721.sol';
 import './IERC721Receiver.sol';
@@ -119,15 +119,19 @@ contract EstateLuxe is ERC721{
 
   function buyRealty(uint256 tokenId)payable public{
     require(_tokenOwner[tokenId] != address(0), "Token does not exist");
+
     (uint256 _price, address _owner, bool _isForSale)  = findListing(tokenId);
+    uint256 money = _price * (1 ether); //converting _price uint value to ether
+
     require(msg.sender != _owner, "You cannot buy your own property");
-    require(msg.value >= _price, "Insufficient ETH provided");
+    require(msg.value >= money, "Insufficient ETH provided");
     require(_isForSale, "Token is not up for sale");
 
-    if(msg.value > _price){
-      payable(msg.sender).transfer(msg.value - _price);
+    if(msg.value > money){
+      uint256 overcharge = msg.value - money;
+      payable(msg.sender).transfer(overcharge);
     }
-    payable(_tokenOwner[tokenId]).transfer(msg.value);
+    payable(_tokenOwner[tokenId]).transfer(money);
 
     transferFrom(_tokenOwner[tokenId], msg.sender, tokenId);
     realtyProperty[tokenId].owner = payable(msg.sender);
@@ -253,6 +257,7 @@ contract EstateLuxe is ERC721{
 
   // check the owner of a specific NFT
   function ownerOf(uint256 _tokenId) external view returns (address owner){
+    require(_tokenOwner[_tokenId] != address(0), "NFT does not exist");
     return _tokenOwner[_tokenId];
   }
 
