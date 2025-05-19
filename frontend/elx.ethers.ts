@@ -14,6 +14,10 @@ let desiredWalletPrivateKey = process.env.WORKING_WALLET_PRIVATE_KEY?.trim();
 
 
 const recipientAddress = process.env.RECIPIENT_ADDRESS?.trim();
+let recipientPrivateKey = process.env.RECIPIENT_PRIVATE_KEY?.trim();
+
+
+// VARIABLE CHECK FOR WALLET A 
 
 if (!contractAddress || !providerUrl || !desiredWalletPrivateKey) {
   throw new Error("Missing required environment variables");
@@ -29,27 +33,60 @@ if (!/^0x[0-9a-fA-F]{64}$/.test(desiredWalletPrivateKey)) {
   throw new Error("Invalid private key format");
 }
 
-// initializing provider and wallet
+//VARIABLE CHECK FOR WALLET B
+
+if (!contractAddress || !providerUrl || !recipientPrivateKey) {
+  throw new Error("Missing required environment variables");
+}
+
+// ensuring private key is correctly prefixed with '0x'
+if (!recipientPrivateKey.startsWith("0x")) {
+  recipientPrivateKey = `0x${recipientPrivateKey}`;
+}
+
+// validate private key format
+if (!/^0x[0-9a-fA-F]{64}$/.test(recipientPrivateKey)) {
+  throw new Error("Invalid private key format");
+}
+
+// initializing provider and wallet (creator)
 const provider = new ethers.JsonRpcProvider(providerUrl);
 const wallet = new ethers.Wallet(desiredWalletPrivateKey, provider);
 
-// connecting  wallet to contract
-const elxContract = new ethers.Contract(contractAddress, elxContractABI, wallet);
+
+// initializing provider and wallet (buyer)
+const recipientProvider = new ethers.JsonRpcProvider(providerUrl);
+const recipientWallet = new ethers.Wallet(recipientPrivateKey, recipientProvider);
+
+// connecting  WALLET A to contract
+const walletAElxContract = new ethers.Contract(contractAddress, elxContractABI, wallet);
+
+// connecting  WALLET B to contract
+const walletBElxContract = new ethers.Contract(contractAddress, elxContractABI, recipientWallet);
 
 class ElxInteractions {
   async getNftNameAndSymbol() {
     try {
-      const tokenName = await elxContract.name();
-      const tokenSymbol = await elxContract.symbol();
+      const tokenName = await walletAElxContract.name();
+      const tokenSymbol = await walletAElxContract.symbol();
       console.log(`Token name: ${tokenName}, Symbol: ${tokenSymbol}`);
     } catch (error) {
       console.error("Failed to fetch token name/symbol:", error);
     }
   }
 
-  async createListing(location: string, description: string, price: number, image: string, tokenCid: string) {
+  async walletACreateListing(location: string, description: string, price: number, image: string, tokenCid: string) {
     try {
-      const createListing = await elxContract.createListing(location, description, price, image, tokenCid)
+      const createListing = await walletAElxContract.createListing(location, description, price, image, tokenCid)
+      console.log("Listing minted:", createListing)
+    } catch (error) {
+      console.error("Failed to create realty listing:", error)
+    }
+  }
+
+  async walletBCreateListing(location: string, description: string, price: number, image: string, tokenCid: string) {
+    try {
+      const createListing = await walletBElxContract.createListing(location, description, price, image, tokenCid)
       console.log("Listing minted:", createListing)
     } catch (error) {
       console.error("Failed to create realty listing:", error)
@@ -57,23 +94,75 @@ class ElxInteractions {
   }
 
 
-  async getMyRealties() {
+  async walletBBuyListing(tokenId: number, ethPrice: number) {
     try {
-      const myRealties = await elxContract.getMyRealties()
+    
+      // sending eth value to payable function
+      const options = {value: ethers.parseEther(ethPrice.toString())}
+      await walletBElxContract.buyRealty(tokenId, options)
+      console.log("Realty bought successfully")
+    } catch (error) {
+      console.error("Failed to buy realty:", error)
+    }
+  }
+
+
+  async walletAGetMyRealties() {
+    try {
+      const myRealties = await walletAElxContract.getMyRealties()
       console.log("Realties tokens:", myRealties)
     } catch (error) {
       console.error("Error fetching realties token:", error)
     }
   }
 
-  async getTokenUri(tokenId: number) {
+  async walletBGetMyRealties() {
     try {
-      const tokenUri = await elxContract.getTokenUri(tokenId)
+      const myRealties = await walletBElxContract.getMyRealties()
+      console.log("Realties tokens:", myRealties)
+    } catch (error) {
+      console.error("Error fetching realties token:", error)
+    }
+  }
+
+  async walletAGetTokenUri(tokenId: number) {
+    try {
+      const tokenUri = await walletAElxContract.getTokenUri(tokenId)
       console.log("Token metadata URI:", tokenUri)
     } catch (error) {
       console.error("Error fetching uri:", error)
     }
   }
+
+  async walletBGetTokenUri(tokenId: number) {
+    try {
+      const tokenUri = await walletBElxContract.getTokenUri(tokenId)
+      console.log("Token metadata URI:", tokenUri)
+    } catch (error) {
+      console.error("Error fetching uri:", error)
+    }
+  }
+
+
+  async walletAGetRealtyTxns(tokenId: number) {
+    try {
+      const response = await walletAElxContract.getRealtyTxns(tokenId)
+      console.log("Token transactions:", response)
+    } catch (error) {
+      console.error("Error fetching transactions:", error)
+    }
+  }
+
+
+  async walletBGetTokenOwner(tokenId: number) {
+    try {
+      const tokenOwner = await walletBElxContract.ownerOf(tokenId)
+      console.log("Token owner:", tokenOwner)
+    } catch (error) {
+      console.error("Error fetching owner:", error)
+    }
+  }
+
 }
 
 const elxInteractions = new ElxInteractions();
@@ -87,8 +176,15 @@ const nftImage = "ipfs://bafybeihq27jrbhh4kmaeruqej7nld267p6ojayw7f5z5m7qrx65glx
 const tokenCid = "bafkreif67z5t3wwrtyr2b4ice7o5qzxdcaa3apgxwnfeui43qembigmdua"
 const ethPrice = 3
 
-// elxInteractions.createListing(location, description, ethPrice, nftImage, tokenCid)
+// elxInteractions.walletACreateListing(location, description, ethPrice, nftImage, tokenCid)
 
-elxInteractions.getMyRealties()
+// elxInteractions.walletAGetMyRealties()
+// elxInteractions.walletBGetMyRealties()
 
-// elxInteractions.getTokenUri(1)
+// elxInteractions.walletBBuyListing(0, 5)
+
+// elxInteractions.walletBGetTokenUri(0)
+
+elxInteractions.walletAGetRealtyTxns(0)
+
+// elxInteractions.walletBGetTokenOwner(0)

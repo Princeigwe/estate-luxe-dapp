@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.13;
+pragma solidity ^0.8.14;
 
 import './ERC721.sol';
 import './IERC721Receiver.sol';
@@ -119,15 +119,21 @@ contract EstateLuxe is ERC721{
 
   function buyRealty(uint256 tokenId)payable public{
     require(_tokenOwner[tokenId] != address(0), "Token does not exist");
+
     (uint256 _price, address _owner, bool _isForSale)  = findListing(tokenId);
+    uint256 money = _price * (1 ether); //converting _price uint value to ether
+
     require(msg.sender != _owner, "You cannot buy your own property");
-    require(msg.value >= _price, "Insufficient ETH provided");
+    require(msg.value >= money, "Insufficient ETH provided");
     require(_isForSale, "Token is not up for sale");
 
-    if(msg.value > _price){
-      payable(msg.sender).transfer(msg.value - _price);
+    if(msg.value > money){
+      uint256 overcharge = msg.value - money;
+      payable(msg.sender).transfer(overcharge);
     }
-    payable(_tokenOwner[tokenId]).transfer(msg.value);
+    payable(_tokenOwner[tokenId]).transfer(money);
+
+    address previousOwner = _tokenOwner[tokenId];
 
     transferFrom(_tokenOwner[tokenId], msg.sender, tokenId);
     realtyProperty[tokenId].owner = payable(msg.sender);
@@ -136,7 +142,7 @@ contract EstateLuxe is ERC721{
     RealtyTxn memory realtyTxn = RealtyTxn({
       tokenId: tokenId,
       price: _price,
-      seller:payable( _tokenOwner[tokenId]),
+      seller:payable(previousOwner),
       buyer: payable(msg.sender),
       date: block.timestamp
     });
@@ -253,6 +259,7 @@ contract EstateLuxe is ERC721{
 
   // check the owner of a specific NFT
   function ownerOf(uint256 _tokenId) external view returns (address owner){
+    require(_tokenOwner[_tokenId] != address(0), "NFT does not exist");
     return _tokenOwner[_tokenId];
   }
 
@@ -296,7 +303,9 @@ contract EstateLuxe is ERC721{
   function transferFrom(address _from, address _to, uint256 _tokenId) public{
     require(_tokenOwner[_tokenId] != address(0), "NFT does not exist");
     require(_to != address(0), "Invalid recipient");
-    require(msg.sender == _tokenOwner[_tokenId] || _isApprovedForSingle[_from][msg.sender][_tokenId] || _isApprovedForAll[_from][msg.sender], "Unauthorized transfer operation");
+
+    address tokenOwner = _tokenOwner[_tokenId];
+    require(_from == tokenOwner || _isApprovedForSingle[tokenOwner][_from][_tokenId] || _isApprovedForAll[tokenOwner][_from], "Unauthorized transfer operation");
 
     _tokenOwner[_tokenId] = _to;
     _ownedTokensCount[_from] -= 1;
