@@ -146,7 +146,7 @@ class ElxInteractions {
 
   async walletAGetRealtyTxns(tokenId: number) {
     try {
-      const response = await walletAElxContract.getRealtyTxns()
+      const response = await walletAElxContract.getRealtyTxns(tokenId)
       console.log("Token transactions:", response)
     } catch (error) {
       console.error("Error fetching transactions:", error)
@@ -181,10 +181,10 @@ const ethPrice = 3
 // elxInteractions.walletAGetMyRealties()
 // elxInteractions.walletBGetMyRealties()
 
-elxInteractions.walletBBuyListing(0, 5)
+// elxInteractions.walletBBuyListing(0, 5)
 
 // elxInteractions.walletBGetTokenUri(0)
 
-// elxInteractions.walletAGetRealtyTxns(0)
+elxInteractions.walletAGetRealtyTxns(0)
 
 // elxInteractions.walletBGetTokenOwner(0)

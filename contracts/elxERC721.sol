@@ -307,8 +307,6 @@ contract EstateLuxe is ERC721{
     address tokenOwner = _tokenOwner[_tokenId];
     require(_from == tokenOwner || _isApprovedForSingle[tokenOwner][_from][_tokenId] || _isApprovedForAll[tokenOwner][_from], "Unauthorized transfer operation");
 
-    // require(msg.sender == _tokenOwner[_tokenId] || _isApprovedForSingle[_from][msg.sender][_tokenId] || _isApprovedForAll[_from][msg.sender], "Unauthorized transfer operation");
-
     _tokenOwner[_tokenId] = _to;
     _ownedTokensCount[_from] -= 1;
     _ownedTokensCount[_to] += 1;
