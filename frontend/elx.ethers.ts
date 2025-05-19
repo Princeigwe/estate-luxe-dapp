@@ -153,6 +153,16 @@ class ElxInteractions {
     }
   }
 
+
+  async walletBGetTokenOwner(tokenId: number) {
+    try {
+      const tokenOwner = await walletBElxContract.ownerOf(tokenId)
+      console.log("Token owner:", tokenOwner)
+    } catch (error) {
+      console.error("Error fetching owner:", error)
+    }
+  }
+
 }
 
 const elxInteractions = new ElxInteractions();
@@ -171,8 +181,10 @@ const ethPrice = 3
 // elxInteractions.walletAGetMyRealties()
 // elxInteractions.walletBGetMyRealties()
 
-elxInteractions.walletBBuyListing(0, 5)
+// elxInteractions.walletBBuyListing(0, 5)
 
 // elxInteractions.walletBGetTokenUri(0)
 
 // elxInteractions.walletAGetRealtyTxns(0)
+
+elxInteractions.walletBGetTokenOwner(0)

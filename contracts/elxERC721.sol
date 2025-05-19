@@ -301,7 +301,11 @@ contract EstateLuxe is ERC721{
   function transferFrom(address _from, address _to, uint256 _tokenId) public{
     require(_tokenOwner[_tokenId] != address(0), "NFT does not exist");
     require(_to != address(0), "Invalid recipient");
-    require(msg.sender == _tokenOwner[_tokenId] || _isApprovedForSingle[_from][msg.sender][_tokenId] || _isApprovedForAll[_from][msg.sender], "Unauthorized transfer operation");
+
+    address tokenOwner = _tokenOwner[_tokenId];
+    require(_from == tokenOwner || _isApprovedForSingle[tokenOwner][_from][_tokenId] || _isApprovedForAll[tokenOwner][_from], "Unauthorized transfer operation");
+
+    // require(msg.sender == _tokenOwner[_tokenId] || _isApprovedForSingle[_from][msg.sender][_tokenId] || _isApprovedForAll[_from][msg.sender], "Unauthorized transfer operation");
 
     _tokenOwner[_tokenId] = _to;
     _ownedTokensCount[_from] -= 1;
