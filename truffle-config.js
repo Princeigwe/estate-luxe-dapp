@@ -1,3 +1,10 @@
+const dotenv = require("dotenv");
+dotenv.config();
+
+const HDWalletProvider = require("@truffle/hdwallet-provider");
+const mnemonics = require('./mnemonics');
+
+
 /**
  * Use this file to configure your truffle project. It's seeded with some
  * common settings for different networks and features like migrations,
@@ -69,6 +76,14 @@ module.exports = {
      port: 7545,            // Standard Ethereum port (default: none)
      network_id: "*",       // Any network (default: none)
     },
+
+    sepolia: {
+      provider: function() {
+        return new HDWalletProvider(mnemonics, `https://sepolia.infura.io/v3/${process.env.INFURA_API_KEY}`)
+      },
+      network_id: 11155111,
+      networkCheckTimeout: 60000 // Increased timeout in milliseconds
+    }
     //
     // An additional network, but with some advanced options…
     // advanced: {
